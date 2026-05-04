@@ -18,17 +18,21 @@ class SoundManager:
     }
 
     _MUSIC_FILE = "assets/sounds/background.mp3"
+    _BASE_FREQ = 44100
 
     def __init__(self):
         self._sounds = {}
         self._music_playing = False
+        self._current_pitch = 1.0
         self._init_mixer()
         self._load_sounds()
 
-    def _init_mixer(self):
+    def _init_mixer(self, frequency=None):
+        if frequency is None:
+            frequency = self._BASE_FREQ
         try:
             if not pygame.mixer.get_init():
-                pygame.mixer.init(frequency=44100, size=-16, channels=2, buffer=512)
+                pygame.mixer.init(frequency=frequency, size=-16, channels=2, buffer=512)
         except pygame.error as e:
             print(f"[SoundManager] mixer init failed: {e}")
 
@@ -75,6 +79,26 @@ class SoundManager:
             self._music_playing = False
         except pygame.error:
             pass
+
+    def set_pitch(self, pitch, volume=MUSIC_VOL_PLAYING):
+        """Reinitialise the mixer at a scaled sample rate to shift pitch.
+
+        Reloads all sound effects and restarts background music.
+        """
+        if pitch == self._current_pitch:
+            return
+        self._current_pitch = pitch
+        new_freq = int(self._BASE_FREQ * pitch)
+        try:
+            pygame.mixer.quit()
+            pygame.mixer.init(frequency=new_freq, size=-16, channels=2, buffer=512)
+        except pygame.error as e:
+            print(f"[SoundManager] mixer reinit failed: {e}")
+            return
+        self._sounds.clear()
+        self._load_sounds()
+        self._music_playing = False
+        self.start_music(volume)
 
     # --- tone generation fallback ---
 

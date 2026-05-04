@@ -59,7 +59,10 @@ class EnemyCar(pygame.sprite.Sprite):
         )
         # Lateral speed scales with vertical speed so faster enemies also
         # drift faster, keeping the challenge consistent across difficulties.
-        self._lateral_speed = max(1.0, move_speed * 0.35)
+        self._lateral_speed = max(0.5, move_speed * 0.18)
+
+        # Maximum drift range from current position (pixels)
+        self._swerve_range = 40
 
         if smart:
             self._pick_new_target()
@@ -87,13 +90,16 @@ class EnemyCar(pygame.sprite.Sprite):
         return surf
 
     def _pick_new_target(self):
-        """Choose a new random X within the road bounds."""
+        """Choose a new random X near current position, clamped to road."""
         half_w = self.rect.width // 2 + 4
-        min_x = self._left_edge + half_w
-        max_x = self._right_edge - half_w
-        if max_x <= min_x:
-            max_x = min_x + 1
-        self._target_x = float(random.randint(min_x, max_x))
+        road_min = self._left_edge + half_w
+        road_max = self._right_edge - half_w
+        if road_max <= road_min:
+            road_max = road_min + 1
+
+        drift_min = max(road_min, int(self._float_x) - self._swerve_range)
+        drift_max = min(road_max, int(self._float_x) + self._swerve_range)
+        self._target_x = float(random.randint(drift_min, drift_max))
         self._retarget_interval = random.randint(
             self._RETARGET_MIN, self._RETARGET_MAX
         )

@@ -42,6 +42,7 @@ DIFFICULTIES = {
         "powerups": True,
         "heart_interval": 10,
         "shield_interval": 15,
+        "music_pitch": 1.0,
     },
     "Medium": {
         "label": "Medium — Level 2",
@@ -52,6 +53,7 @@ DIFFICULTIES = {
         "spawn_rate": 60,
         "lives": 3,
         "powerups": False,
+        "music_pitch": 1.05,
     },
     "Hard": {
         "label": "Hard — Level 3",
@@ -62,6 +64,7 @@ DIFFICULTIES = {
         "spawn_rate": 40,
         "lives": 1,
         "powerups": False,
+        "music_pitch": 1.10,
     },
 }
 

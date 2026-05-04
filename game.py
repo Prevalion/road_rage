@@ -131,7 +131,7 @@ class Game:
             elif self.state == STATE_GAME_OVER:
                 if ev.type == pygame.KEYDOWN:
                     if ev.key == pygame.K_r:
-                        self.sound_mgr.set_music_volume(MUSIC_VOL_MENU)
+                        self.sound_mgr.set_pitch(1.0, MUSIC_VOL_MENU)
                         self.state = STATE_DIFFICULTY
                     elif ev.key == pygame.K_q:
                         self.running = False
@@ -225,7 +225,7 @@ class Game:
         self._shield_timer = 0
         self.new_record    = False
 
-        self.sound_mgr.set_music_volume(MUSIC_VOL_PLAYING)
+        self.sound_mgr.set_pitch(cfg.get("music_pitch", 1.0), MUSIC_VOL_PLAYING)
         self.state = STATE_PLAYING
 
     # ------------------------------------------------------------------
