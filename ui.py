@@ -16,7 +16,7 @@ def _load_font(size, bold=False):
 
 
 class UIRenderer:
-    """Handles all non-gameplay screen drawing: menus, overlays, difficulty select."""
+    # draws menus, overlays, difficulty select — everything except gameplay
 
     _MENU_DASH_H = 38
     _MENU_DASH_GAP = 28
@@ -32,9 +32,7 @@ class UIRenderer:
         self.font_small  = _load_font(22)
         self.font_tiny   = _load_font(17)
 
-    # ------------------------------------------------------------------
-    # Menu road background
-    # ------------------------------------------------------------------
+    # menu road background
 
     def draw_menu_road(self, surface, menu_scroll):
         surface.fill(DARK_GREEN)
@@ -54,9 +52,7 @@ class UIRenderer:
             pygame.draw.rect(surface, (165, 165, 165), (cx, y, 6, dash_h))
             y += tile_h
 
-    # ------------------------------------------------------------------
-    # Main menu
-    # ------------------------------------------------------------------
+    # main menu screen
 
     def draw_menu(self, surface, menu_scroll):
         self.draw_menu_road(surface, menu_scroll)
@@ -95,9 +91,7 @@ class UIRenderer:
             surface.blit(ds, (sx + ks.get_width(), hy))
             hy += 22
 
-    # ------------------------------------------------------------------
-    # Difficulty select
-    # ------------------------------------------------------------------
+    # difficulty buttons
 
     def diff_buttons(self):
         buttons = {}
@@ -146,9 +140,7 @@ class UIRenderer:
         hint = self.font_tiny.render("Keys  1 / 2 / 3  or click a button", True, GRAY)
         surface.blit(hint, (WINDOW_WIDTH // 2 - hint.get_width() // 2, 558))
 
-    # ------------------------------------------------------------------
-    # Pause overlay
-    # ------------------------------------------------------------------
+    # pause overlay
 
     def draw_pause_overlay(self, surface):
         overlay = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.SRCALPHA)
@@ -161,9 +153,7 @@ class UIRenderer:
         hint = self.font_small.render("Press  P  or  ESC  to Resume", True, (200, 200, 200))
         surface.blit(hint, (WINDOW_WIDTH // 2 - hint.get_width() // 2, 310))
 
-    # ------------------------------------------------------------------
-    # Game-over overlay
-    # ------------------------------------------------------------------
+    # game over overlay
 
     def draw_gameover_overlay(self, surface, score, diff_cfg, new_record, score_mgr, chosen_difficulty):
         overlay = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.SRCALPHA)

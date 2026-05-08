@@ -15,7 +15,7 @@ from sounds import SoundManager, MUSIC_VOL_MENU, MUSIC_VOL_PLAYING
 from road import Road, HighScoreManager
 from ui import UIRenderer
 
-# Difficulties that use smart (swerving) enemies
+# these difficulties have swerving enemies
 _SMART_DIFFICULTIES = {"Medium", "Hard"}
 
 
@@ -24,7 +24,6 @@ class Game:
     def __init__(self):
         pygame.init()
 
-        # fullscreen
         flags = pygame.FULLSCREEN | pygame.HWSURFACE | pygame.DOUBLEBUF
         self.screen = pygame.display.set_mode((0, 0), flags)
         self.display_w = self.screen.get_width()
@@ -51,7 +50,7 @@ class Game:
 
         self.state = STATE_MENU
 
-        # game objects (initialised per-round)
+        # set up per round
         self.road = None
         self.player_car = None
         self.all_sprites = None
@@ -63,7 +62,7 @@ class Game:
         self.diff_cfg = {}
         self._hover_btn = None
 
-        # gameplay counters
+        # counters
         self.score = 0
         self.lives = 0
         self.enemy_speed = 0.0
@@ -74,7 +73,6 @@ class Game:
         self._shield_timer = 0
         self.new_record = False
 
-        # menu road scroll
         self._menu_scroll = 0.0
 
     def _to_game_pos(self, screen_pos):
@@ -83,9 +81,7 @@ class Game:
         gy = (ry - self.render_offset_y) / self.render_scale
         return (int(gx), int(gy))
 
-    # ------------------------------------------------------------------
-    # Main loop
-    # ------------------------------------------------------------------
+    # main loop
 
     def run(self):
         while self.running:
@@ -95,9 +91,7 @@ class Game:
             self._draw()
         pygame.quit()
 
-    # ------------------------------------------------------------------
-    # Events
-    # ------------------------------------------------------------------
+    # events
 
     def _handle_events(self):
         for ev in pygame.event.get():
@@ -136,9 +130,7 @@ class Game:
                     elif ev.key == pygame.K_q:
                         self.running = False
 
-    # ------------------------------------------------------------------
-    # Update
-    # ------------------------------------------------------------------
+    # update
 
     def _update(self):
         if self.state == STATE_MENU:
@@ -155,9 +147,7 @@ class Game:
         elif self.state == STATE_PLAYING:
             self._tick_gameplay()
 
-    # ------------------------------------------------------------------
-    # Draw
-    # ------------------------------------------------------------------
+    # draw
 
     def _draw(self):
         self.screen.fill(BLACK)
@@ -185,16 +175,14 @@ class Game:
                 self.new_record, self.score_mgr, self.chosen_difficulty,
             )
 
-        # scale to fullscreen
+        # scale up to fullscreen
         fw = int(WINDOW_WIDTH * self.render_scale)
         fh = int(WINDOW_HEIGHT * self.render_scale)
         scaled = pygame.transform.smoothscale(canvas, (fw, fh))
         self.screen.blit(scaled, (self.render_offset_x, self.render_offset_y))
         pygame.display.flip()
 
-    # ------------------------------------------------------------------
-    # Round setup
-    # ------------------------------------------------------------------
+    # round setup
 
     def _start_round(self, diff_key):
         self.chosen_difficulty = diff_key
@@ -228,15 +216,13 @@ class Game:
         self.sound_mgr.set_pitch(cfg.get("music_pitch", 1.0), MUSIC_VOL_PLAYING)
         self.state = STATE_PLAYING
 
-    # ------------------------------------------------------------------
-    # Gameplay tick
-    # ------------------------------------------------------------------
+    # gameplay tick
 
     def _tick_gameplay(self):
         cfg = self.diff_cfg
         self.score += 1
 
-        # speed ramp
+        # gradually speed up
         self._speed_timer += 1
         bump_interval = cfg["speed_interval"] * FPS
         if self._speed_timer >= bump_interval:
@@ -244,7 +230,7 @@ class Game:
             self.spawn_rate = max(20, self.spawn_rate - 4)
             self._speed_timer = 0
 
-        # spawn enemies
+        # spawn enemies on a timer
         self._spawn_timer += 1
         variation  = int(self.spawn_rate * 0.2)
         min_wait   = max(10, self.spawn_rate - variation)
@@ -261,34 +247,34 @@ class Game:
             self.all_sprites.add(enemy)
             self._spawn_timer = 0
 
-        # powerups (easy mode only)
+        # powerups only on easy
         if cfg.get("powerups"):
             self._tick_powerups(cfg)
 
-        # scroll road
+        # move road
         self.road.update(max(3.0, self.enemy_speed))
 
-        # update player
+        # player movement
         pressed = pygame.key.get_pressed()
         self.player_car.update(pressed)
 
-        # update enemies
+        # enemies
         for e in list(self.enemy_group):
             e.update()
             if e.is_off_screen():
                 e.kill()
 
-        # update powerups
+        # powerups
         for p in list(self.powerup_group):
             p.update()
             if p.is_off_screen():
                 p.kill()
 
-        # collisions
+        # check hits and pickups
         self._check_collisions()
         self._check_pickups()
 
-        # sync hud
+        # update hud numbers
         self.hud.update(
             self.lives, self.score,
             self.score_mgr.get(self.chosen_difficulty),
@@ -344,15 +330,13 @@ class Game:
         self.new_record = self.score_mgr.update(self.chosen_difficulty, self.score)
         self.state = STATE_GAME_OVER
 
-    # ------------------------------------------------------------------
-    # Gameplay drawing
-    # ------------------------------------------------------------------
+    # drawing gameplay stuff
 
     def _draw_gameplay(self, surface):
         self.road.draw(surface)
         self.all_sprites.draw(surface)
 
-        # shield glow ring
+        # draw shield ring if active
         if self.player_car and self.player_car.shield_active:
             glow_r    = max(PLAYER_WIDTH, PLAYER_HEIGHT) // 2 + 10
             flash_thresh = 2 * 60
